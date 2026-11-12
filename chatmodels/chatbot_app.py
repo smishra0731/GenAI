@@ -5,7 +5,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 load_dotenv()  # Load environment variables from .env file
 
-st.set_page_config(page_title="GenAI Chatbot", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="GenAI Chatbot", layout="centered")
 
 # Initialize the chat model
 model = ChatGroq(model="openai/gpt-oss-120b", temperature=0.9)
@@ -13,21 +13,18 @@ model = ChatGroq(model="openai/gpt-oss-120b", temperature=0.9)
 # Same modes as the original code, plus card styling info
 MODES = {
     "Funny AI": {
-        "emoji": "😂",
         "tagline": "Humorous and entertaining",
         "color1": "#FFB347",
         "color2": "#FFCC33",
         "prompt": "You are a Funny AI agent. You are humorous and entertaining.",
     },
     "Sad AI": {
-        "emoji": "😢",
         "tagline": "Empathetic and understanding",
         "color1": "#4A90E2",
         "color2": "#6FB1FC",
         "prompt": "You are a Sad AI agent. You are empathetic and understanding.",
     },
     "Angry AI": {
-        "emoji": "😡",
         "tagline": "Aggressive and impatient",
         "color1": "#E53935",
         "color2": "#FF6F60",
@@ -52,7 +49,6 @@ st.markdown(
         transform: translateY(-6px) scale(1.03);
         box-shadow: 0 12px 26px rgba(0,0,0,0.35);
     }
-    .mood-emoji { font-size: 56px; line-height: 1.1; }
     .mood-title { font-size: 22px; font-weight: 700; margin-top: 8px; }
     .mood-tagline { font-size: 14px; opacity: 0.95; margin-top: 4px; }
     .hero { text-align: center; margin-bottom: 8px; }
@@ -68,9 +64,16 @@ st.markdown(
         box-shadow: 0 4px 14px rgba(0,0,0,0.25);
         margin-bottom: 16px;
     }
-    .mood-banner .emoji { font-size: 36px; }
     .mood-banner .name { font-size: 20px; font-weight: 700; }
     .mood-banner .hint { font-size: 13px; opacity: 0.9; }
+    header[data-testid="stHeader"],
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    #MainMenu,
+    footer,
+    div[data-testid^="chatAvatarIcon-"] {
+        display: none;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -79,7 +82,7 @@ st.markdown(
 # ---------- Step 1: Choose AI mode (cards) ----------
 if "messages" not in st.session_state:
     st.markdown(
-        "<div class='hero'><h1>🤖 GenAI Chatbot</h1>"
+        "<div class='hero'><h1>GenAI Chatbot</h1>"
         "<p>Choose your AI mode</p></div>",
         unsafe_allow_html=True,
     )
@@ -92,7 +95,6 @@ if "messages" not in st.session_state:
                 f"""
                 <div class="mood-card"
                      style="background: linear-gradient(135deg, {info['color1']}, {info['color2']});">
-                    <div class="mood-emoji">{info['emoji']}</div>
                     <div class="mood-title">{name}</div>
                     <div class="mood-tagline">{info['tagline']}</div>
                 </div>
@@ -113,7 +115,6 @@ else:
         f"""
         <div class="mood-banner"
              style="background: linear-gradient(135deg, {info['color1']}, {info['color2']});">
-            <div class="emoji">{info['emoji']}</div>
             <div>
                 <div class="name">{name}</div>
                 <div class="hint">Type 0 to exit</div>
@@ -129,7 +130,7 @@ else:
             with st.chat_message("user"):
                 st.write(msg.content)
         elif isinstance(msg, AIMessage):
-            with st.chat_message("assistant", avatar=info["emoji"]):
+            with st.chat_message("assistant"):
                 st.write(msg.content)
 
     prompt = st.chat_input("You: ")
@@ -144,7 +145,7 @@ else:
         with st.chat_message("user"):
             st.write(prompt)
 
-        with st.chat_message("assistant", avatar=info["emoji"]):
+        with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 response = model.invoke(st.session_state.messages)
             st.write(response.content)
